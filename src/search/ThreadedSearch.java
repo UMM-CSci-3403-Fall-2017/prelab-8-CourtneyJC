@@ -11,6 +11,7 @@ public class ThreadedSearch<T> implements Runnable {
   private Answer answer;
 
   public ThreadedSearch() {
+
   }
 
   private ThreadedSearch(T target, ArrayList<T> list, int begin, int end, Answer answer) {
@@ -47,25 +48,59 @@ public class ThreadedSearch<T> implements Runnable {
     * threads, wait for them to all terminate, and then return the answer
     * in the shared `Answer` instance.
     */
-    return false;
+    Thread[] threads = new Thread[numThreads];
+    Answer answer = new Answer();
+    int first = 0;
+    int gapSize = list.size() / numThreads;
+    for (int i = 0; i < numThreads; i++){
+      threads[i] = new Thread(new ThreadedSearch<T>(target,list,first, first + gapSize, answer));
+      threads[i].start();
+      first = first + gapSize;
+//      System.out.println("Starting thread " + i);
+    }
+    for(int i = 0; i < numThreads; ++i){
+      threads[i].join();
+    }
+    System.out.println("threaded searched through " + answer.getCount() + " elements");
+    return answer.getAnswer();
   }
 
   public void run() {
-
+    int searched = 0;
+    System.out.println("Starting search at " + this.begin);
+    for(int i = this.begin; i < this.end; i++){
+      searched++;
+      while (answer.getAnswer() == false) {
+          if (this.list.get(i).equals(this.target)) {
+              this.answer.setAnswer(true);
+//        this.answer.whereFound(i);
+              this.answer.incCount(searched);
+//        System.out.println("Searched through " + searched + " elements");
+              break;
+          }
+      }
+    }
+    this.answer.incCount(searched);
   }
 
   private class Answer {
     private boolean answer = false;
+    private int threadFound;
+    private int counted = 0;
 
     public boolean getAnswer() {
       return answer;
     }
+    public int getWhereFound() { return threadFound; }
+    public int getCount() { return counted;}
 
     // This has to be synchronized to ensure that no two threads modify
     // this at the same time, possibly causing race conditions.
     public synchronized void setAnswer(boolean newAnswer) {
       answer = newAnswer;
     }
+    public synchronized void whereFound(int threadNumber) { threadFound = threadNumber; }
+    public synchronized void incCount(int searched) { counted = counted + searched;}
   }
 
 }
