@@ -56,7 +56,6 @@ public class ThreadedSearch<T> implements Runnable {
       threads[i] = new Thread(new ThreadedSearch<T>(target,list,first, first + gapSize, answer));
       threads[i].start();
       first = first + gapSize;
-//      System.out.println("Starting thread " + i);
     }
     for(int i = 0; i < numThreads; ++i){
       threads[i].join();
@@ -67,31 +66,31 @@ public class ThreadedSearch<T> implements Runnable {
 
   public void run() {
     int searched = 0;
-    System.out.println("Starting search at " + this.begin);
+    // for loop runs through the elements looking for a match
     for(int i = this.begin; i < this.end; i++){
-      searched++;
-      while (answer.getAnswer() == false) {
-          if (this.list.get(i).equals(this.target)) {
+      searched++; // I'm keeping track of how many elements it looks at
+      // if answer is already true, break
+      if(this.answer.getAnswer() == true){
+          break;
+      }
+      // if it finds a match, set answer to true and break
+      if (this.list.get(i).equals(this.target)) {
               this.answer.setAnswer(true);
-//        this.answer.whereFound(i);
               this.answer.incCount(searched);
-//        System.out.println("Searched through " + searched + " elements");
               break;
-          }
       }
     }
+    // answer keeps track of how many elements were looked at, so I know for each search, not each thread
     this.answer.incCount(searched);
   }
 
   private class Answer {
     private boolean answer = false;
-    private int threadFound;
     private int counted = 0;
 
     public boolean getAnswer() {
       return answer;
     }
-    public int getWhereFound() { return threadFound; }
     public int getCount() { return counted;}
 
     // This has to be synchronized to ensure that no two threads modify
@@ -99,7 +98,6 @@ public class ThreadedSearch<T> implements Runnable {
     public synchronized void setAnswer(boolean newAnswer) {
       answer = newAnswer;
     }
-    public synchronized void whereFound(int threadNumber) { threadFound = threadNumber; }
     public synchronized void incCount(int searched) { counted = counted + searched;}
   }
 

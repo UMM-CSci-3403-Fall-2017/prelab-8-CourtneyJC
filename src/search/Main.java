@@ -6,7 +6,7 @@ import java.util.Random;
 public class Main {
 
   public static void main(String[] args) throws InterruptedException {
-    final int ARRAY_SIZE = 10000000;
+    final int ARRAY_SIZE = 50000000;
     Random random = new Random();
     ArrayList<Integer> numbers = new ArrayList<Integer>();
     for (int i=0; i<ARRAY_SIZE; ++i) {
@@ -34,21 +34,23 @@ public class Main {
     // with this and see how that changes things. Keep in mind that your number
     // of threads *may* need to evenly divide the length of the list being
     // searched (ARRAY_SIZE in this case).
+
       long time1 = System.currentTimeMillis();
       boolean threadedSearcher = searcher.parSearch(1, target,list);
+
       long time2 = System.currentTimeMillis();
       boolean linearSearcher = searcher2.search(target,list);
+
       long time3 = System.currentTimeMillis();
-      boolean threadedSearcher2 = searcher.parSearch(4, target,list);
+      boolean threadedSearcher2 = searcher.parSearch(10, target,list);
+
       long time4 = System.currentTimeMillis();
+
       if(threadedSearcher == linearSearcher){
-//          System.out.println("They agree!");
           System.out.println("Linear Time : " + (time3 - time2) + ", Threaded Time 1: " + (time2 - time1) + ", Threaded time 2: " + (time4 - time3));
           return threadedSearcher;
       }
       return false;
-//    return searcher.parSearch(4, target, list);
-//    return searcher2.search(target,list);
   }
 
 }
